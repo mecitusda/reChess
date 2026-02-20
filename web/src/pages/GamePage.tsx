@@ -6,6 +6,7 @@ import type { Square } from "chess.js";
 import "./css/gamePage.css"
 import { Chess } from "chess.js";
 import { getAuthToken, getOrCreateGuestId } from "../auth/auth";
+import { API_BASE_URL } from "../config";
 import { useActiveGame } from "../context/ActiveGameContext";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 type ServerState = {
@@ -183,7 +184,7 @@ export default function GamePage() {
     if (!token) return false;
 
     try {
-      const res = await fetch(`http://localhost:4000/games/${gid}`, {
+      const res = await fetch(`${API_BASE_URL}/games/${gid}`, {
         headers: {
           Authorization: `Bearer ${token}`,
           "x-guest-id": getOrCreateGuestId(),
@@ -357,16 +358,22 @@ export default function GamePage() {
   }, [moves]);
 
 
+  // Aktif hamle satırını sadece liste kutusu içinde kaydır; sayfayı (window) kaydırma — mobilde panel aşağı kaymasın
   useEffect(() => {
-    const root = movesListRef.current;
-    if (!root) return;
-    const active = root.querySelector(".move-cell.active") as HTMLElement | null;
-    if (!active) return;
+    const list = movesListRef.current;
+    if (!list) return;
+    const active = list.querySelector(".move-cell.active") as HTMLElement | null;
+    const row = active?.closest(".move-row") as HTMLElement | null;
+    if (!row) return;
 
-    active.scrollIntoView({
-      block: "nearest",
-      inline: "nearest",
-    });
+    const rowTop = row.offsetTop;
+    const rowHeight = row.offsetHeight;
+    const listHeight = list.clientHeight;
+    const scrollMax = list.scrollHeight - listHeight;
+    if (scrollMax <= 0) return;
+
+    const targetScroll = rowTop - listHeight / 2 + rowHeight / 2;
+    list.scrollTop = Math.max(0, Math.min(targetScroll, scrollMax));
   }, [cursor, moves.length]);
 
   const readyLastSecRef = useRef<number | null>(null);
@@ -850,8 +857,47 @@ export default function GamePage() {
         <>
          
           <div className="game">
-          
-          
+          {/* Mobilde sol panel gizli olduğu için beraberlik teklifini burada da göster (sadece küçük ekranda görünür) */}
+          {drawOfferFrom && ended == null && (
+            <div className="drawOfferBanner">
+              <div className="drawOfferBanner__title">Beraberlik teklifi</div>
+              <div className="drawOfferBanner__desc">Rakip beraberlik teklif etti. Kabul ediyor musun?</div>
+              <div className="drawOfferBanner__actions">
+                <button
+                  type="button"
+                  className="miniBtn miniBtn--primary"
+                  onClick={() => {
+                    socket.emit("game:draw_accept", { gameId });
+                    setDrawOfferFrom(null);
+                  }}
+                >
+                   Kabul
+                </button>
+                <button
+                  type="button"
+                  className="miniBtn"
+                  onClick={() => {
+                    socket.emit("game:draw_decline", { gameId });
+                    setDrawOfferFrom(null);
+                  }}
+                >
+                   Reddet
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Mobilde sol panel gizli: oyun bitişi / iptal bilgisi */}
+          {endedSummary && (
+            <div className={`gameResultBanner gameResultBanner--${endedSummary.tone}`}>
+              <div className="gameResultBanner__title">{endedSummary.title}</div>
+              <div className="gameResultBanner__desc">{endedSummary.desc}</div>
+              {endedSummary.meta && (
+                <div className="gameResultBanner__meta">{endedSummary.meta}</div>
+              )}
+            </div>
+          )}
+
           <div className="bar__left leftPanel">
             <div className="leftPanel__header">
               <div className="leftPanel__titleWrap">
@@ -915,7 +961,7 @@ export default function GamePage() {
                         setDrawOfferFrom(null);
                       }}
                     >
-                      ✅ Kabul
+                      Kabul
                     </button>
                     <button
                       type="button"
@@ -925,7 +971,7 @@ export default function GamePage() {
                         setDrawOfferFrom(null);
                       }}
                     >
-                      ❌ Reddet
+                       Reddet
                     </button>
                   </div>
                 </div>

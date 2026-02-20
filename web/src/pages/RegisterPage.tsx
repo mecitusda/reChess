@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuthToken, setAuthToken, getOrCreateGuestId } from "../auth/auth";
+import { API_BASE_URL } from "../config";
 import { identifySocket } from "../socket/socket";
 import "./css/authPage.css";
 import AuthVisual from "./AuthVisual";
@@ -21,7 +22,7 @@ export default function RegisterPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:4000/auth/register", {
+      const res = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -34,7 +35,7 @@ export default function RegisterPage() {
       setAuthToken(json.data.token);
       identifySocket();
 
-      const ag = await fetch("http://localhost:4000/auth/active-game", {
+      const ag = await fetch(`${API_BASE_URL}/auth/active-game`, {
         headers: {
           Authorization: `Bearer ${json.data.token}`,
           "x-guest-id": getOrCreateGuestId(),

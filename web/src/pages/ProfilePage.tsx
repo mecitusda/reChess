@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { getAuthToken, getOrCreateGuestId } from "../auth/auth";
+import { API_BASE_URL } from "../config";
 import { socket } from "../socket/socket";
 import {
   Bar,
@@ -176,7 +177,7 @@ export default function ProfilePage() {
       setData(null);
       try {
         const token = getAuthToken();
-        const res = await fetch(`http://localhost:4000/users/${encodeURIComponent(username)}`, {
+        const res = await fetch(`${API_BASE_URL}/users/${encodeURIComponent(username)}`, {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             "x-guest-id": getOrCreateGuestId(),

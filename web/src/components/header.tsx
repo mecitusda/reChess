@@ -2,6 +2,7 @@ import "./css/Header.css";
 import { useEffect, useRef, useState } from "react";
 import { AUTH_CHANGED_EVENT, clearAuthToken, getAuthToken, getOrCreateGuestName, getOrCreateGuestId } from "../auth/auth";
 import { NavLink, useNavigate } from "react-router-dom";
+import { API_BASE_URL } from "../config";
 import Avatar from '@mui/material/Avatar';
 type NavItem = {
   label: string;
@@ -54,7 +55,7 @@ export default function Header() {
       return;
     }
     try {
-      const res = await fetch("http://localhost:4000/auth/me", {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: {
           Authorization: `Bearer ${nextToken}`,
           "x-guest-id": getOrCreateGuestId(),

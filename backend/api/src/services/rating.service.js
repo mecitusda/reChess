@@ -16,15 +16,32 @@ export function speedFromClock({ initialMs, incrementMs }) {
 }
 
 const DEFAULT_RATING = 1500;
+const RATING_CACHE_TTL_SEC = 30;
 
 export async function getCurrentRating(identity, speed) {
   if (!speed) return DEFAULT_RATING;
   const id = String(identity || "");
   if (!id.startsWith("user:")) return DEFAULT_RATING;
   const userId = id.slice("user:".length);
+  const cacheKey = `rating:${userId}:${speed}`;
+  try {
+    const cached = await redis.get(cacheKey);
+    if (cached !== null && cached !== undefined) {
+      const n = parseInt(cached, 10);
+      if (Number.isFinite(n)) return n;
+    }
+  } catch {
+    // ignore cache miss/error
+  }
   const doc = await UserRating.findOne({ userId, speed }).select({ rating: 1 }).lean();
   const r = Number(doc?.rating);
-  return Number.isFinite(r) ? r : DEFAULT_RATING;
+  const out = Number.isFinite(r) ? r : DEFAULT_RATING;
+  try {
+    await redis.set(cacheKey, String(out), "EX", RATING_CACHE_TTL_SEC);
+  } catch {
+    // ignore
+  }
+  return out;
 }
 
 async function loadOrInit(userId, speed) {

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuthToken, setAuthToken, getOrCreateGuestId } from "../auth/auth";
+import { API_BASE_URL } from "../config";
 import { identifySocket } from "../socket/socket";
 import "./css/authPage.css";
 import AuthVisual from "./AuthVisual";
@@ -133,7 +134,7 @@ export default function LoginPage() {
     setFpErr(null);
     
     try {
-      const res = await fetch("http://localhost:4000/auth/password-reset/request", {
+      const res = await fetch(`${API_BASE_URL}/auth/password-reset/request`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: fpEmail }),
@@ -166,7 +167,7 @@ export default function LoginPage() {
     setFpErr(null);
     
     try {
-      const res = await fetch("http://localhost:4000/auth/password-reset/confirm", {
+      const res = await fetch(`${API_BASE_URL}/auth/password-reset/confirm`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: fpEmail, code: fpCode, newPassword: fpNewPass }),
@@ -187,7 +188,7 @@ export default function LoginPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("http://localhost:4000/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -201,7 +202,7 @@ export default function LoginPage() {
       identifySocket();
 
                 
-      const ag = await fetch("http://localhost:4000/auth/active-game", {
+      const ag = await fetch(`${API_BASE_URL}/auth/active-game`, {
         headers: {
           Authorization: `Bearer ${json.data.token}`,
           "x-guest-id": getOrCreateGuestId(),
@@ -211,7 +212,7 @@ export default function LoginPage() {
       if (gid) nav(`/game/${gid}`);
       else nav("/");
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "LOGIN_FAILED";
+      const msg = e instanceof Error ? API_BASE_URL : "LOGIN_FAILED";
       setError(msg);
     } finally {
       setLoading(false);

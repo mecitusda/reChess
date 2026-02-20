@@ -34,6 +34,13 @@ function ChessBoardOnline({
   const effectiveFen = isReplay ? fen : localFen;
 
   const chess = useMemo(() => new Chess(effectiveFen), [effectiveFen]);
+
+  /** Hamleyi hemen tahtada göster (sunucu yanıtını beklemeden). Sunucudan game:state gelince fen prop güncellenir. */
+  function applyOptimisticMove(from: Square, to: Square, promotion?: PromotionPiece) {
+    const c = new Chess(effectiveFen);
+    const ok = c.move({ from, to, promotion: promotion ?? "q" });
+    if (ok) setLocalFen(c.fen());
+  }
   const [checkStyles, setCheckStyles] = useState<
     Record<string, React.CSSProperties>
   >({});
@@ -588,6 +595,7 @@ function onSquareClick({ square }: SquareHandlerArgs) {
         return;
       }
       socket.emit("game:move", { gameId, from: selectedSquare, to: sq, promotion: "q" });
+      applyOptimisticMove(selectedSquare, sq);
       setSelectedSquare(null);
       setLegalStyles({});
       return;
@@ -651,7 +659,7 @@ function onSquareClick({ square }: SquareHandlerArgs) {
       to: targetSquare,
       promotion: "q",
     });
-
+    applyOptimisticMove(sourceSquare as Square, targetSquare as Square);
     return false;
   }
 
@@ -762,6 +770,7 @@ useEffect(() => {
                         to: pendingPromotion.to,
                         promotion: piece,
                       });
+                      applyOptimisticMove(pendingPromotion.from, pendingPromotion.to, piece);
                       setPendingPromotion(null);
                       setSelectedSquare(null);
                       setLegalStyles({});

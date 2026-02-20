@@ -1,7 +1,9 @@
 import { io, Socket } from "socket.io-client";
 import { getAuthToken, getOrCreateGuestId, getOrCreateGuestName } from "../auth/auth";
 
-export const socket: Socket = io("http://localhost:4000", {
+import { API_BASE_URL } from "../config";
+
+export const socket: Socket = io(API_BASE_URL, {
   transports: ["websocket"],
   auth: {
     token: getAuthToken(),

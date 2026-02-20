@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { getAuthToken, getOrCreateGuestId } from "../auth/auth";
+import { API_BASE_URL } from "../config";
 import { Link } from "react-router-dom";
 import "./css/gamesPage.css";
 
@@ -86,7 +87,7 @@ export default function GamesPage() {
           return;
         }
 
-        const res = await fetch("http://localhost:4000/games/me?limit=20", {
+        const res = await fetch(`${API_BASE_URL}/games/me?limit=20`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "x-guest-id": getOrCreateGuestId(),

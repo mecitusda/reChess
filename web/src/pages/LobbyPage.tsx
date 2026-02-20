@@ -7,6 +7,7 @@ import { useEffect, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { socket } from "../socket/socket";
 import { getAuthToken, getOrCreateGuestId } from "../auth/auth";
+import { API_BASE_URL } from "../config";
 
 import {
   Bar,
@@ -107,7 +108,7 @@ export default function LobbyPage() {
     const refreshActiveGame = async () => {
       try {
         const token = getAuthToken();
-        const res = await fetch("http://localhost:4000/auth/active-game", {
+        const res = await fetch(`${API_BASE_URL}/auth/active-game`, {
           headers: {
             ...(token ? { Authorization: `Bearer ${token}` } : {}),
             "x-guest-id": getOrCreateGuestId(),
@@ -204,7 +205,7 @@ export default function LobbyPage() {
       setStatsLoading(true);
       setStatsError(null);
       try {
-        const res = await fetch("http://localhost:4000/stats/me", {
+        const res = await fetch(`${API_BASE_URL}/stats/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
             "x-guest-id": getOrCreateGuestId(),

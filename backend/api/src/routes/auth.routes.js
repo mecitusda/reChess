@@ -218,7 +218,6 @@ authRouter.post("/password-reset/confirm", async (req, res) => {
 authRouter.post("/login", async (req, res) => {
   const username = normalizeUsername(req.body?.username);
   const password = String(req.body?.password || "");
-
   const user = await User.findOne({ username }).lean();
   if (!user?.passwordHash) return res.status(401).json({ ok: false, error: "INVALID_CREDENTIALS" });
 

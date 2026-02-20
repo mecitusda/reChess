@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { AUTH_CHANGED_EVENT, getAuthToken, getOrCreateGuestId } from "../../auth/auth";
+import { API_BASE_URL } from "../../config";
 import { socket } from "../../socket/socket";
 import type { MatchResult } from "../match-history/types";
 import { MatchHistoryList } from "../match-history/MatchHistoryList";
@@ -31,7 +32,7 @@ export default function LobbyLeftPanel({
   }, [token, guestId]);
 
   async function refreshRecent() {
-    const res = await fetch("http://localhost:4000/games/recent?limit=5", { headers });
+    const res = await fetch(`${API_BASE_URL}/games/recent?limit=5`, { headers });
     const json = await res.json();
     const next = Array.isArray(json?.data) ? (json.data as MatchResult[]) : [];
     setRecent(next);

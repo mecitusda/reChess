@@ -18,6 +18,7 @@
   text-transform: uppercase;
   color: rgba(255,255,255,0.90);
   justify-self: center;
+  text-align: center;
 }
 .lobby__left {
   flex: 0 0 260px; 
@@ -404,6 +405,7 @@
   font-weight: 900;
   letter-spacing: 0.01em;
   line-height: 1.05;
+  color: #ffffff;
 }
 
 .speed {
@@ -411,6 +413,7 @@
   font-size: clamp(11px, 1.0vw, 12px);
   opacity: 0.75;
   text-transform: lowercase;
+  color: #ffffff;
 }
 
 .quick-actions {
@@ -875,6 +878,9 @@
 }
 
 @media (max-width: 520px){
+  .lobby{
+    padding: 2rem 0;
+  }
   .time-grid{
     --tc-ratio: 1.45; 
     grid-template-columns: repeat(3, minmax(0, 1fr));
