@@ -1,0 +1,115 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap");
+
+:root{
+  /* Project font */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, "Apple Color Emoji",
+    "Segoe UI Emoji";
+
+  /* App palette (lichess-like dark) */
+  --app-bg: #1f1f1f;
+  --app-bg-elev: rgba(255,255,255,0.02);
+  /* header bg: bandı örtmeyecek kadar hafif */
+  --app-header-bg: rgba(0,0,0,0.14);
+  --tile-bg: rgba(255,255,255,0.04);
+  --tile-border: rgba(255,255,255,0.08);
+  --tile-hover: rgba(79,124,201,0.10);
+  --tile-hover-border: rgba(79,124,201,0.24);
+
+  /* Lighting */
+  --glow-warm: rgba(255, 168, 76, 0.10);
+  --glow-soft: rgba(255, 255, 255, 0.07);
+  --glow-cool: rgba(79, 124, 201, 0.08);
+  --vignette: rgba(0, 0, 0, 0.70);
+
+  --header-h: 66px;
+
+  /* Top light band gradients (reuse in header too) */
+  --top-band-soft: linear-gradient(180deg,
+    rgba(255,255,255,0.10) 0%,
+    rgba(255,255,255,0.06) 22%,
+    rgba(255,255,255,0.02) 46%,
+    transparent 100%);
+  --top-band-warm: linear-gradient(180deg,
+    rgba(255,168,76,0.06) 0%,
+    rgba(255,168,76,0.025) 26%,
+    transparent 100%);
+}
+
+:root {
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: var(--app-bg);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+a {
+  font-weight: 500;
+  color: #646cff;
+  text-decoration: inherit;
+}
+a:hover {
+  color: #535bf2;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  position: relative;
+  /* Sayfa tabanı (üst ışık ayrı katmanda) */
+  background:
+    radial-gradient(1400px 980px at 50% 120%, var(--vignette), transparent 56%),
+    var(--app-bg);
+}
+
+/* Lichess benzeri: sadece üstte, full-width light band */
+body::before{
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 170px; /* sadece header bölgesi gibi kalsın */
+  pointer-events: none;
+  z-index: 0;
+  background: var(--top-band-soft), var(--top-band-warm);
+}
+
+#root{
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  cursor: pointer;
+  transition: border-color 0.25s;
+}
+button:hover {
+  border-color: #646cff;
+}
+
+
+/* Not: light theme devre dışı (tasarım dark) */
