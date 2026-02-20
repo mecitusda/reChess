@@ -8,6 +8,14 @@ import { Chess } from "chess.js";
 import { getAuthToken, getOrCreateGuestId } from "../auth/auth";
 import { API_BASE_URL } from "../config";
 import { useActiveGame } from "../context/ActiveGameContext";
+import {
+  playMoveSound,
+  playCaptureSound,
+  playCheckSound,
+  playCheckmateSound,
+  playNotifySound,
+  preloadGameSounds,
+} from "../sounds/gameSounds";
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 type ServerState = {
   gameId: string;
@@ -174,6 +182,10 @@ export default function GamePage() {
         inviteCopyTimerRef.current = null;
       }
     };
+  }, []);
+
+  useEffect(() => {
+    preloadGameSounds();
   }, []);
 
   const mySide: "w" | "b" = myColor ?? "w";
@@ -474,10 +486,49 @@ export default function GamePage() {
         return;
       }
 
+      const lastMoveChanged =
+        !prev ||
+        prev.lastMove?.from !== s.lastMove?.from ||
+        prev.lastMove?.to !== s.lastMove?.to;
+      const opponentJustMoved =
+        s.lastMove && my != null && s.turn === my;
+
+      if (lastMoveChanged && opponentJustMoved) {
+        if (s.status === "finished" && s.reason === "checkmate") {
+          playCheckmateSound();
+        } else if (prev?.fen && s.lastMove) {
+          try {
+            const chess = new Chess(prev.fen);
+            const piece = chess.get(s.lastMove.from);
+            const isPawnPromo =
+              piece?.type === "p" &&
+              ((piece.color === "w" && s.lastMove.to.endsWith("8")) ||
+                (piece.color === "b" && s.lastMove.to.endsWith("1")));
+            const moveObj = chess.move({
+              from: s.lastMove.from,
+              to: s.lastMove.to,
+              ...(isPawnPromo ? { promotion: "q" as const } : {}),
+            });
+            if (moveObj) {
+              if (chess.inCheck()) playCheckSound();
+              else if (moveObj.captured) playCaptureSound();
+              else playMoveSound();
+            } else {
+              playMoveSound();
+            }
+          } catch {
+            playMoveSound();
+          }
+        } else {
+          playMoveSound();
+        }
+      }
+
       setState(s);
     };
     const onEnded = (p: EndedPayload) => {
       if (p?.gameId && p.gameId !== gameId) return;
+      if (p.reason !== "checkmate") playNotifySound();
       setInActiveGame(null);
       setEnded(p);
       setState((prev) =>
@@ -498,8 +549,9 @@ export default function GamePage() {
         (p.by === "white" && myColor === "w") ||
         (p.by === "black" && myColor === "b")
       ) {
-        return; 
+        return;
       }
+      playNotifySound();
       setDrawOfferFrom(p.by);
     };
 
@@ -711,14 +763,14 @@ export default function GamePage() {
   try {
     const chess = new Chess(prevFenRef.current);
     const { from, to } = state.lastMove;
-
-    const turn = chess.turn();
-    const isPromotion =
-      (turn === "w" && to.endsWith("8")) ||
-      (turn === "b" && to.endsWith("1"));
+    const piece = chess.get(from);
+    const isPawnPromotion =
+      piece?.type === "p" &&
+      ((piece.color === "w" && to.endsWith("8")) ||
+        (piece.color === "b" && to.endsWith("1")));
 
     const mv = chess.move(
-      isPromotion ? { from, to, promotion: "q" } : { from, to }
+      isPawnPromotion ? { from, to, promotion: "q" } : { from, to }
     );
 
     if (!mv) {

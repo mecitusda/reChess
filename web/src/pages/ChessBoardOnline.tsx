@@ -116,10 +116,13 @@ function ChessBoardOnline({
 }
 
   type PromotionPiece = "q" | "r" | "b" | "n";
-  function isPromotionMove(myColor: "w" | "b", from: Square, to: Square): boolean {
+  /** Sadece piyon son sıraya gidiyorsa terfi sayılır. */
+  function isPromotionMove(chess: Chess, from: Square, to: Square): boolean {
+    const piece = chess.get(from);
+    if (!piece || piece.type !== "p") return false;
     return (
-      (myColor === "w" && from[1] === "7" && to[1] === "8") ||
-      (myColor === "b" && from[1] === "2" && to[1] === "1")
+      (piece.color === "w" && from[1] === "7" && to[1] === "8") ||
+      (piece.color === "b" && from[1] === "2" && to[1] === "1")
     );
   }
 
@@ -495,7 +498,7 @@ function onSquareClick({ square }: SquareHandlerArgs) {
       const targets = getPreMoveLegalTargets(fen, premoveFromSquare, myColor);
       const t = targets.find((x) => x.to === sq);
       if (t) {
-        if (isPromotionMove(myColor, premoveFromSquare, sq)) {
+        if (isPromotionMove(chess, premoveFromSquare, sq)) {
           setPendingPreMovePromotion({
             from: premoveFromSquare,
             to: sq,
@@ -536,7 +539,7 @@ function onSquareClick({ square }: SquareHandlerArgs) {
         const targets = getPreMoveLegalTargets(fen, sq, myColor);
         const t = targets.find((x) => x.to === premoveIntentTo);
         if (t) {
-          if (isPromotionMove(myColor, sq, premoveIntentTo)) {
+          if (isPromotionMove(chess, sq, premoveIntentTo)) {
             setPendingPreMovePromotion({
               from: sq,
               to: premoveIntentTo,
@@ -649,7 +652,7 @@ function onSquareClick({ square }: SquareHandlerArgs) {
 
   //  NORMAL MOVE
   if (canMove) {
-    if (myColor && isPromotionMove(myColor, sourceSquare as Square, targetSquare as Square)) {
+    if (myColor && isPromotionMove(chess, sourceSquare as Square, targetSquare as Square)) {
       setPendingPromotion({ from: sourceSquare as Square, to: targetSquare as Square });
       return false;
     }
@@ -677,7 +680,7 @@ function onSquareClick({ square }: SquareHandlerArgs) {
     return false;
   }
 
-  if (isPromotionMove(myColor, from, to)) {
+  if (isPromotionMove(chess, from, to)) {
     setPendingPreMovePromotion({ from, to, isCapture: target.isOccupied });
     setPreMoveStyles(buildPreMoveStyle(from, to, target.isOccupied));
     clearPreMoveSelection();
