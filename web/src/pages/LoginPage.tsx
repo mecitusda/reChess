@@ -212,7 +212,7 @@ export default function LoginPage() {
       if (gid) nav(`/game/${gid}`);
       else nav("/");
     } catch (e: unknown) {
-      const msg = e instanceof Error ? API_BASE_URL : "LOGIN_FAILED";
+      const msg = e instanceof Error ? e.message : "LOGIN_FAILED";
       setError(msg);
     } finally {
       setLoading(false);
